@@ -1,0 +1,5 @@
+package com.kabank.mvc.template;
+
+public class Conn {
+
+}

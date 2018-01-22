@@ -1,0 +1,5 @@
+@charset "UTF-8";
+#bitcamp_main_table,tr,td{border :1px solid black;border-collapse:collapse;}
+#attend_table tr td{width:800px; height:100px; border :1px solid black; border-collapse:collapse;}
+#mypage_table tr td{width:800px; height:100px; border :1px solid black; border-collapse:collapse;}
+.column{width: 100px;}

@@ -1,0 +1,10 @@
+@charset "UTF-8";
+*{margin: 0px; padding: 20px;}
+#add_member_wrapper{margin-top: 50px;}
+#add_member_aside{padding: 20px;float:left; width: 10%; height :600px; margin-left:100px; border: 2px solid grey;}
+#add_member_section{padding: 20px;float:left; width: 70%; height :600px; margin-left:50px; border: 2px solid grey;}
+#add_member_table{width: 600px; height: 400px; margin:50px 0px 0px 50px; text-align: center;}
+#add_member_table tr{height: 20px;}
+#add_member_table tr td{height: 20px;}
+#add_member_table,tr,td{border-bottom: 2px solid gray;}
+#add_member_btn{width: 10px; height: 5px;}

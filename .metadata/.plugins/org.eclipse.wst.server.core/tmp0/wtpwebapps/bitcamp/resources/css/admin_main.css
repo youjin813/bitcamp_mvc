@@ -1,0 +1,9 @@
+@charset "UTF-8";
+*{margin: 0px; padding: 0px;}
+#admin_wrapper{margin-top: 50px;}
+#admin_aside{padding: 20px;float:left; width:10%; height :600px; margin-left:100px; border: 2px solid grey;}
+#admin_section{padding: 20px;float:left; width: 70%; height :600px; margin-left:50px; border: 2px solid grey;}
+#admin_table{width: 800px; height: 100px;margin:100px 0px 0px 50px; text-align: center;}
+#admin_table tr td{width: 800px; height: 100px;}
+#admin_table,tr,td{border :1px solid black;border-collapse:collapse;}
+#create_table_btn{width: 90%; height: 90%;}

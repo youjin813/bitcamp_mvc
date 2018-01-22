@@ -1,0 +1,152 @@
+package com.kabank.mvc.controller;
+
+import java.io.IOException;
+import java.util.Map;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import com.kabank.mvc.command.ChangeCommand;
+import com.kabank.mvc.command.Command;
+import com.kabank.mvc.command.DeleteCommand;
+import com.kabank.mvc.command.InitCommand;
+import com.kabank.mvc.command.JoinCommand;
+import com.kabank.mvc.command.MoveCommand;
+import com.kabank.mvc.command.ResultMap;
+import com.kabank.mvc.command.LoginCommand;
+import com.kabank.mvc.domain.MemberBean;
+import com.kabank.mvc.serviceImpl.BankServiceImpl;
+import com.kabank.mvc.serviceImpl.FoodServiceImpl;
+import com.kabank.mvc.serviceImpl.LottoServiceImpl;
+import com.kabank.mvc.serviceImpl.MemberServiceImpl;
+import com.kabank.mvc.serviceImpl.MobileServiceImpl;
+import com.kabank.mvc.util.DispatcherServlet;
+
+@WebServlet("/user.do")
+public class MemberController extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	protected void service(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		HttpSession session = request.getSession();
+		InitCommand init = new InitCommand(request);
+		Command cmd = null;
+		ResultMap rm = null;
+		init.execute();
+		MemberBean member =null;
+		switch (InitCommand.cmd.getAction()) {
+		case MOVE:
+			System.out.println("=======MEMBER :MOVE IN==========");
+			move(request);
+			System.out.println("DEST IS"+InitCommand.cmd.getView());
+			System.out.println("DEST IS"+InitCommand.cmd.getView());
+			DispatcherServlet.send(request, response);
+			System.out.println("=======MEMBER :MOVE OUT==========");
+			break;
+		case LOGIN:
+			System.out.println("=======MEMBER-C :LOGIN IN==========");
+			new LoginCommand(request).execute();
+			cmd = new Command();
+			@SuppressWarnings("unchecked")
+			Map<String, String> paramMap = 
+					(Map<String, String>) new InitCommand(request).paramMap();
+			System.out.println("넘어온 아이디 :"+ paramMap.get("id"));
+			System.out.println("넘어온 비번 :"+ paramMap.get("pass"));
+			cmd.setMember(new MemberBean());
+			cmd.getMember().setId(paramMap.get("id"));
+			cmd.getMember().setPass(paramMap.get("pass"));
+			System.out.println("set Id"+cmd.getMember().setId(id););
+			rm = MemberServiceImpl.getInstance().login(cmd);
+			System.out.println("SUCCESS ? "+rm.isSeccess());
+			if(!rm.isSeccess()) {
+				InitCommand.cmd.setDir("user");
+				InitCommand.cmd.setPage("login");
+			}else {
+				System.out.println("=====로그인 성공====");
+				session.setAttribute("user", rm.getMember());
+				mypage(request);
+				InitCommand.cmd.setPage("user");
+				InitCommand.cmd.setPage("mypage");
+				System.out.println("방금 로그인 한 멤버:"+((MemberBean) session.getAttribute("user")).toString());
+			}
+			move(request);
+			DispatcherServlet.send(request, response);
+			break;
+		case LOGOUT:
+			System.out.println("=======MEMBER-C :LOGOUT IN==========");
+			session.invalidate();
+			move(request);
+			DispatcherServlet.send(request, response);
+			System.out.println("=======MEMBER-C :LOGOUT OUT==========");
+			break;
+		case MYPAGE:
+			mypage(request);
+			break;	
+		case CHANGE_PASS:
+			cmd = new Command();
+			System.out.println("=======MEMBER :CHANGE IN==========");
+			member = new MemberBean();
+			new ChangeCommand(request).execute();
+			System.out.println("수정할비번"+InitCommand.cmd.getData());
+			String id = ((MemberBean) session.getAttribute("user")).getId();
+			member.setId(id);
+			member.setPass(InitCommand.cmd.getData());
+			MemberServiceImpl.getInstance().changePass(cmd);	
+			member=(MemberBean) session.getAttribute("user");
+			session.setAttribute("user", member);
+			System.out.println("변경확인");
+			System.out.println(member.toString());
+			move(request);
+			System.out.println("DEST IS"+InitCommand.cmd.getView());
+			System.out.println("=======MEMBER :CHANGE OUT==========");
+			DispatcherServlet.send(request, response);
+			break;
+		case DELETE:
+			System.out.println("=======MEMBER :DELETE IN==========");
+			cmd = new Command();
+			new DeleteCommand(request).execute();
+			System.out.println(InitCommand.cmd.getData()+"11111111111111111111");
+			MemberServiceImpl.getInstance().delete(cmd);
+			session.invalidate();
+			move(request);
+			DispatcherServlet.send(request, response);
+			System.out.println("=======MEMBER :DELETE out==========");
+			break;
+		case JOIN:
+			System.out.println("==============MEMBER-C : JOIN IN===========");
+			cmd = new Command();
+			new JoinCommand(request).execute();
+			MemberServiceImpl.getInstance().join(cmd);
+			new MoveCommand(request).execute();
+			DispatcherServlet.send(request, response);
+			System.out.println("==============MEMBER-C : JOIN OUT===========");
+			break;
+		default:
+			break;
+		}	
+	}
+
+	private void move(HttpServletRequest request) {
+		new MoveCommand(request).execute();
+	}
+	
+	private void mypage(HttpServletRequest request) {
+		HttpSession session = request.getSession();
+		MemberBean member = (MemberBean) session.getAttribute("user");
+		//기본값은 무조건 있을것이다 그래서 널 체크가 필요없다 하지만 추가되는 객체 account phone 는 널일수 있다
+		Command cmd = new Command();
+		cmd.setData(member.getId());
+		ResultMap a = BankServiceImpl.getInstance().findAccountById(cmd);
+		ResultMap m = MobileServiceImpl.getInstance().findMobileById(cmd);
+		ResultMap l = LottoServiceImpl.getInstance().findLottoById(cmd);
+		ResultMap f = FoodServiceImpl.getInstance().findFoodById(cmd);
+		if(a.isSeccess()) {
+			session.setAttribute("account", a.getAccount());
+			}
+		//if(m!=null) {member.setMobile(m);}
+		//if(l!=null) {member.setLotto(l);}
+		//if(f!=null) {member.setFood(f);}
+		session.setAttribute("user", member);
+		}
+}
